@@ -17,6 +17,7 @@ public class Client {
     private static Scanner keyboardScanner = new Scanner(System.in);
     private static final String SYSTEM_WAY_SEPARATOR = System.getProperty("file.separator");
     private static File destinationDirectory = new File("Downloads");
+    private static final int PORT = 7442;
 
     //A thread for commands sending
     private static Thread outputTread = new Thread(new Runnable() {
@@ -45,7 +46,7 @@ public class Client {
     public static void startClient() {
         try {
             //Command Line connection
-            serverSocket = new ServerSocket(7442);
+            serverSocket = new ServerSocket(PORT);
             commandLineSocket = serverSocket.accept();
             commandLineInputScanner = new Scanner(commandLineSocket.getInputStream());
             commandLinePrintWriter = new PrintWriter(commandLineSocket.getOutputStream(), true);
@@ -57,6 +58,7 @@ public class Client {
             inputThread.start();
             //Running a thread for commands sending
             outputTread.start();
+            System.out.println("Waiting for JCL");
         } catch (IOException e) {
             localPrintWriter.println("Server offline.");
         }

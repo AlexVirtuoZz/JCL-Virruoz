@@ -17,7 +17,7 @@ public class CommandLine {
     private static PrintWriter printWriter;
     private static String[] command;
     private static String currentDirectory;
-    private static final String CLIENT_IP = "enter IP here";
+    private static final String CLIENT_IP = "127.0.0.1";
     private static final int CLIENT_PORT = 7442;
 
     public static void setCurrentDirectory(String currentDirectory) { CommandLine.currentDirectory = currentDirectory; }
@@ -99,8 +99,8 @@ public class CommandLine {
 
     //Greets a client
     private static void printGreetings() {
-        System.out.println("Java Command Line. Created by VirtuoZz.");
-        System.out.println("Type 'help' to get command list.");
+        printWriter.println("Java Command Line. Created by VirtuoZz.");
+        printWriter.println("Type 'help' to get command list.");
     }
 
     //If no available command was found
