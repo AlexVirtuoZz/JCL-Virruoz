@@ -11,20 +11,20 @@ import java.util.Scanner;
 public class CommandLine {
 
     private static String systemWaySeparator = System.getProperty("file.separator");;
-    private static String startedDirectory;
+    private static String startDirectory;
     private static String executableFormat;
     private static Scanner scanner = new Scanner(System.in);
     private static PrintWriter printWriter;
     private static String[] command;
     private static String currentDirectory;
-    private static final String CLIENT_IP = "127.0.0.1";
+    private static final String CLIENT_IP = "enter IP here";
     private static final int CLIENT_PORT = 7442;
 
     public static void setCurrentDirectory(String currentDirectory) { CommandLine.currentDirectory = currentDirectory; }
 
-    public static void setStartedDirectory(String startedDirectory) {CommandLine.startedDirectory = startedDirectory;}
+    public static void setStartDirectory(String startDirectory) {CommandLine.startDirectory = startDirectory;}
 
-    public static String getStartedDirectory() { return startedDirectory; }
+    public static String getStartDirectory() { return startDirectory; }
 
     public static String getCurrentDirectory() { return currentDirectory; }
 
@@ -47,13 +47,17 @@ public class CommandLine {
     }
 
     private static void readAndRunCommand() throws IOException {
-        currentDirectory = startedDirectory;
+        //Before running, set current directory as start directory
+        currentDirectory = startDirectory;
         while (true) {
+            //Splitting up received command
             command = scanner.nextLine().split(" ");
+            //Redirecting and executing command
             recognizeCommand(command);
         }
     }
 
+    //Redirects specified command
     private static void recognizeCommand(String[] command) throws IOException {
         switch (command[0]) {
             case "cd":
@@ -82,6 +86,9 @@ public class CommandLine {
             case "exit":
                 Exit.exitCommandLine();
                 break;
+            case "ip":
+                IPAddress.currentIP();
+                break;
             case "":
                 break;
             default:
@@ -90,15 +97,19 @@ public class CommandLine {
         }
     }
 
+    //Greets a client
     private static void printGreetings() {
         System.out.println("Java Command Line. Created by VirtuoZz.");
         System.out.println("Type 'help' to get command list.");
     }
 
+    //If no available command was found
     private static void printWarning() {
         printWriter.println("Command '" + command[0] + "' not found. Type 'help' to get command list.");
     }
 
+    //A method to define if connection is remote or local
+    //doesn't work properly for now
     private static void localOrNetVersion() throws Exception {
         System.out.println("Input 'l' for local, or 'n' for network version of JavaCommandLine.");
         while (true) {
@@ -115,12 +126,13 @@ public class CommandLine {
         }
     }
 
+    //Defines operating system and sets executable format for "run" method
     private static void chooseSystem() {
         if (System.getProperty("os.name").startsWith("Win")) {
-            startedDirectory = "C:\\";
+            startDirectory = "C:\\";
             executableFormat = ".exe";
         }else if (System.getProperty("os.name").startsWith("Lin")) {
-            startedDirectory = "/";
+            startDirectory = "/";
             executableFormat = ".deb";
         }else {
             System.out.println("Unknown OS");
@@ -128,21 +140,24 @@ public class CommandLine {
         }
     }
 
+    //Establish settings for remote version
     private static void buildNetworkVersion() {
         try {
             Socket socket = new Socket(CLIENT_IP, CLIENT_PORT);
             scanner = new Scanner(socket.getInputStream());
             printWriter = new PrintWriter(socket.getOutputStream(), true);
-            System.out.println("User connected.");
+            System.out.println("User connected");
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
+    //Establish settings for local version
     private static void buildLocalVersion() {
         printWriter = new PrintWriter(System.out, true);
     }
 
+    //Starts Java Command Line
     public static void startCommandLine() {
         try {
             chooseSystem();

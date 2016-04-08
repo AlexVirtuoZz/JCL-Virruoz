@@ -17,6 +17,8 @@ public class Client {
     private static Scanner keyboardScanner = new Scanner(System.in);
     private static final String SYSTEM_WAY_SEPARATOR = System.getProperty("file.separator");
     private static File destinationDirectory = new File("Downloads");
+
+    //A thread for commands sending
     private static Thread outputTread = new Thread(new Runnable() {
         @Override
         public void run() {
@@ -26,37 +28,34 @@ public class Client {
             }
         }
     });
+    //A thread for result reading
     private static Thread inputThread = new Thread(new Runnable() {
         @Override
         public void run() {
             while (commandLineSocket.isConnected()) {
-                try {
                     String input = commandLineInputScanner.nextLine();
                     localPrintWriter.println(input);
                     if (input.equals("Copying...")) {
                         readFile();
                     }
-                } catch (Exception e) {
-                    inputThread.stop();
-                }
             }
         }
     });
 
     public static void startClient() {
         try {
-            //Подключение командной строки
+            //Command Line connection
             serverSocket = new ServerSocket(7442);
             commandLineSocket = serverSocket.accept();
             commandLineInputScanner = new Scanner(commandLineSocket.getInputStream());
             commandLinePrintWriter = new PrintWriter(commandLineSocket.getOutputStream(), true);
-            //Создание папки в которую будут копироваться файлы
+            //Creating a directory for downloaded files
             if (!destinationDirectory.canRead()) {
                 destinationDirectory.mkdir();
             }
-            //Запуск потока для чтения результата выполнения команд
+            //Running a thread for result reading
             inputThread.start();
-            //Запуск потока для отправки команд
+            //Running a thread for commands sending
             outputTread.start();
         } catch (IOException e) {
             localPrintWriter.println("Server offline.");
@@ -64,18 +63,18 @@ public class Client {
 
     }
 
-    //Метод для копирования отдельных файлов, папок, или же для копирования древа директорий и файлов
+    //A method for receiving files, directories or an entire tree of directories
     private static void readFile() {
         try {
-            //Открытие нового сокета для копирования файла
+            //Opening a socket for file receiving
             Socket downloadsSocket = serverSocket.accept();
-            //Имя передаваемого файла
+            //Obtaining file's name
             String fileName = new DataInputStream(downloadsSocket.getInputStream()).readUTF();
-            //Имя папки в которой лежит файл
+            //Obtaining file's directory name
             String directoryName = new DataInputStream(downloadsSocket.getInputStream()).readUTF();
-            //Проверка на то, является ли передаваемый файл папкой
+            //Checking, if a file or a directory
             boolean isDirectory = new DataInputStream(downloadsSocket.getInputStream()).readBoolean();
-
+            //Receiving a file
             if (isDirectory) {
                 new File(destinationDirectory.getName() + SYSTEM_WAY_SEPARATOR + directoryName
                         + SYSTEM_WAY_SEPARATOR + fileName).mkdir();
